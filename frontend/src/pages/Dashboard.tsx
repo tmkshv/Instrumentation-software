@@ -68,11 +68,7 @@ export default function Dashboard() {
 
       {/* Camera bank */}
       <div style={{ ["--i" as string]: 2 }}>
-        <SectionHeader
-          eyebrow="Optical / Live"
-          title="Field of View"
-          meta={`${cameras.cameras.length} camera${cameras.cameras.length === 1 ? "" : "s"} bound`}
-        />
+        <SectionHeader eyebrow="Optical / Live" title="Field of View" />
         {cameras.cameras.length === 0 ? (
           <EmptyCameras />
         ) : (
@@ -95,26 +91,11 @@ export default function Dashboard() {
   );
 }
 
-function SectionHeader({
-  eyebrow,
-  title,
-  meta,
-}: {
-  eyebrow: string;
-  title: string;
-  meta?: string;
-}) {
+function SectionHeader({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
-    <div className="flex items-end justify-between mb-3">
-      <div>
-        <div className="eyebrow">{eyebrow}</div>
-        <h2 className="display text-bone text-2xl mt-1">{title}</h2>
-      </div>
-      {meta && (
-        <div className="mono text-[10.5px] tracking-[0.22em] uppercase text-ash">
-          {meta}
-        </div>
-      )}
+    <div className="mb-3">
+      <div className="eyebrow">{eyebrow}</div>
+      <h2 className="display text-bone text-2xl mt-1">{title}</h2>
     </div>
   );
 }

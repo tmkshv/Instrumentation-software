@@ -15,7 +15,7 @@ const FIELDS: Array<{
 }> = [
   { key: "ph", label: "Acidity", unit: "pH", digits: 2, code: "A1" },
   { key: "conductivity_us_cm", label: "Conductivity", unit: "uS/cm", digits: 0, code: "C1" },
-  { key: "temperature_c", label: "Temperature", unit: "deg C", digits: 1, code: "T1" },
+  { key: "temperature_c", label: "Temperature", unit: "°C", digits: 1, code: "T1" },
   { key: "moisture_pct", label: "Moisture", unit: "% vol", digits: 1, code: "M1" },
   { key: "organic_index", label: "Organic Index", unit: "rel", digits: 2, code: "O1" },
 ];
@@ -23,21 +23,9 @@ const FIELDS: Array<{
 export default function ChemPanel({ latest, history }: Props) {
   return (
     <section className="panel p-5">
-      <header className="flex items-start justify-between mb-4">
-        <div>
-          <div className="eyebrow">CHEM / IN SITU</div>
-          <h2 className="display text-bone text-2xl mt-1">Soil Chemistry</h2>
-        </div>
-        <div className="text-right">
-          <div className="eyebrow-dim">Sampled</div>
-          <div className="mono text-xs text-sand mt-0.5">
-            {latest
-              ? new Date(latest.timestamp * 1000).toLocaleTimeString([], {
-                  hour12: false,
-                })
-              : "--:--:--"}
-          </div>
-        </div>
+      <header className="mb-4">
+        <div className="eyebrow">CHEM / IN SITU</div>
+        <h2 className="display text-bone text-2xl mt-1">Soil Chemistry</h2>
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-0 border-t border-dusk">
@@ -53,7 +41,7 @@ export default function ChemPanel({ latest, history }: Props) {
             >
               <div className="flex items-center justify-between">
                 <span className="eyebrow-dim">{code}</span>
-                <span className="mono text-[9.5px] tracking-[0.22em] uppercase text-ash">
+                <span className="mono text-[19px] tracking-[0.12em] text-ash">
                   {unit}
                 </span>
               </div>
