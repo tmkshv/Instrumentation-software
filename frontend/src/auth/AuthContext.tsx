@@ -44,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const raw = err instanceof Error ? err.message : "Unable to reach the science API.";
           const unreachable =
             raw === "Failed to fetch" ||
+            raw === "Load failed" ||
             raw.includes("NetworkError") ||
             raw.includes("ECONNREFUSED");
           setBackendError(
