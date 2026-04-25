@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
-import { api, getToken, setToken } from "../api/client";
+import { ApiError, api, getToken, setToken } from "../api/client";
 
 interface InfoResponse {
   auth_enabled: boolean;
@@ -9,6 +9,8 @@ interface AuthContextValue {
   ready: boolean;
   authRequired: boolean;
   hasToken: boolean;
+  /** Set when /api/info could not be reached (e.g. backend not running). Not a missing token. */
+  backendError: string | null;
   login: (token: string) => Promise<void>;
   logout: () => void;
   error: string | null;
@@ -20,18 +22,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authRequired, setAuthRequired] = useState(false);
   const [hasToken, setHasToken] = useState(Boolean(getToken()));
   const [ready, setReady] = useState(false);
+  const [backendError, setBackendError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    setReady(false);
+    setBackendError(null);
     api
       .get<InfoResponse>("/api/info")
       .then((info) => {
         setAuthRequired(info.auth_enabled);
+        setBackendError(null);
         setReady(true);
       })
-      .catch(() => {
-        // /api/info returns 401 if a token is required and we don't have one.
-        setAuthRequired(true);
+      .catch((err: unknown) => {
+        if (err instanceof ApiError && err.status === 401) {
+          setAuthRequired(true);
+          setBackendError(null);
+        } else {
+          setAuthRequired(false);
+          const raw = err instanceof Error ? err.message : "Unable to reach the science API.";
+          const unreachable =
+            raw === "Failed to fetch" ||
+            raw.includes("NetworkError") ||
+            raw.includes("ECONNREFUSED");
+          setBackendError(
+            unreachable
+              ? "Cannot reach the API (is the backend running on port 8000?). Refresh after starting it."
+              : raw
+          );
+        }
         setReady(true);
       });
   }, [hasToken]);
@@ -58,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ ready, authRequired, hasToken, login, logout, error }}
+      value={{ ready, authRequired, hasToken, backendError, login, logout, error }}
     >
       {children}
     </AuthContext.Provider>
