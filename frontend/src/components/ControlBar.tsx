@@ -2,19 +2,21 @@ import { useState } from "react";
 import { api } from "../api/client";
 import { SystemStatus } from "../types";
 
+export type ControlAction = "start" | "stop" | "sample";
+
 interface Props {
   status: SystemStatus | null;
-  onChanged: () => void;
+  onChanged: (action: ControlAction) => void;
 }
 
 export default function ControlBar({ status, onChanged }: Props) {
   const [busy, setBusy] = useState(false);
 
-  const run = async (path: string) => {
+  const run = async (path: string, action: ControlAction) => {
     setBusy(true);
     try {
       await api.post(path);
-      onChanged();
+      onChanged(action);
     } finally {
       setBusy(false);
     }
@@ -54,7 +56,7 @@ export default function ControlBar({ status, onChanged }: Props) {
           <button
             className="btn btn-primary"
             disabled={busy || isRunning}
-            onClick={() => run("/api/start")}
+            onClick={() => run("/api/start", "start")}
           >
             <Glyph>&#9654;</Glyph>
             Engage
@@ -62,7 +64,7 @@ export default function ControlBar({ status, onChanged }: Props) {
           <button
             className="btn btn-ghost"
             disabled={busy}
-            onClick={() => run("/api/sample")}
+            onClick={() => run("/api/sample", "sample")}
           >
             <Glyph>&#9673;</Glyph>
             Sample
@@ -70,7 +72,7 @@ export default function ControlBar({ status, onChanged }: Props) {
           <button
             className="btn btn-danger"
             disabled={busy || !isRunning}
-            onClick={() => run("/api/stop")}
+            onClick={() => run("/api/stop", "stop")}
           >
             <Glyph>&#9632;</Glyph>
             Halt

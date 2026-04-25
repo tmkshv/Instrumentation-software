@@ -14,7 +14,7 @@ const FIELDS: Array<{
   code: string;
 }> = [
   { key: "ph", label: "Acidity", unit: "pH", digits: 2, code: "A1" },
-  { key: "conductivity_us_cm", label: "Conductivity", unit: "uS/cm", digits: 0, code: "C1" },
+  { key: "conductivity_us_cm", label: "Conductivity", unit: "µS/cm", digits: 0, code: "C1" },
   { key: "temperature_c", label: "Temperature", unit: "°C", digits: 1, code: "T1" },
   { key: "moisture_pct", label: "Moisture", unit: "% vol", digits: 1, code: "M1" },
   { key: "organic_index", label: "Organic Index", unit: "rel", digits: 2, code: "O1" },
