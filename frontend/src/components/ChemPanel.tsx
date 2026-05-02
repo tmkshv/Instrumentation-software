@@ -61,7 +61,7 @@ export default function ChemPanel({ latest, history }: Props) {
                     <Line
                       type="monotone"
                       dataKey="v"
-                      stroke="#11BFB5"
+                      stroke="#7C5CFF"
                       dot={false}
                       strokeWidth={1.25}
                       isAnimationActive={false}

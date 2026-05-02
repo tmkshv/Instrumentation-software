@@ -20,10 +20,10 @@ export default function Callsign() {
   return (
     <div className="mono text-[10.5px] tracking-[0.22em] uppercase text-ash flex items-center gap-4 flex-wrap">
       <span>URC 2025</span>
-      <span className="text-hair">//</span>
+      <span className="text-lake">//</span>
       <span>MDRS Utah 38.927 N 110.793 W</span>
-      <span className="text-hair">//</span>
-      <span className="text-sand">{utc}</span>
+      <span className="text-lake">//</span>
+      <span className="text-bone">{utc}</span>
     </div>
   );
 }

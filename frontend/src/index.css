@@ -7,20 +7,21 @@
    -------------------------------------------------------------------------- */
 
 :root {
-  --umbra: #0b0806;
-  --soil: #16110c;
-  --rock: #231912;
-  --dusk: #3a2a1b;
-  --hair: #54402c;
-  --bone: #efe3d0;
-  --sand: #bea888;
-  --ash: #6f5e4a;
-  --rust: #11bfb5;
-  --ember: #47d4cb;
-  --amber: #6bc9c2;
-  --sage: #7fa05e;
-  --blood: #be2f2b;
-  --lake: #3a5973;
+  /* Husky Robotics palette - pure black ground, white type, violet accent. */
+  --umbra: #000000;
+  --soil: #08080a;
+  --rock: #101012;
+  --dusk: #1f1f23;
+  --hair: #2a2a30;
+  --bone: #ffffff;
+  --sand: #d4d4d8;
+  --ash: #8a8a92;
+  --rust: #7c5cff;
+  --ember: #9b85ff;
+  --amber: #b5a5ff;
+  --sage: #10b981;
+  --blood: #ef4444;
+  --lake: #52525b;
 
   --stagger: 70ms;
 }
@@ -36,19 +37,19 @@ body {
   color: var(--bone);
   background-color: var(--umbra);
   background-image:
-    /* faint blueprint grid */
-    linear-gradient(to right, rgba(84, 64, 44, 0.07) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(84, 64, 44, 0.07) 1px, transparent 1px),
-    /* warm radial glow from top-left, like a desk lamp */
-    radial-gradient(1200px 700px at 15% -10%, rgba(17, 191, 181, 0.1), transparent 60%),
-    radial-gradient(900px 600px at 110% 110%, rgba(58, 89, 115, 0.12), transparent 60%);
-  background-size: 32px 32px, 32px 32px, auto, auto;
+    /* faint vertical grid - barely there */
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    /* cool violet glow from top-left */
+    radial-gradient(1100px 700px at 12% -10%, rgba(124, 92, 255, 0.10), transparent 60%),
+    radial-gradient(900px 600px at 110% 110%, rgba(124, 92, 255, 0.06), transparent 60%);
+  background-size: 36px 36px, 36px 36px, auto, auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: 0.005em;
 }
 
-/* Grain overlay - inline SVG turbulence for atmosphere. */
+/* Subtle grain overlay - keeps the surface from looking flat. */
 body::before {
   content: "";
   position: fixed;
@@ -56,13 +57,13 @@ body::before {
   pointer-events: none;
   z-index: 1;
   mix-blend-mode: overlay;
-  opacity: 0.35;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.93  0 0 0 0 0.89  0 0 0 0 0.82  0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.18;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 
-/* Selection - accent on bone. */
+/* Selection - violet accent on white. */
 ::selection {
-  background: rgba(17, 191, 181, 0.35);
+  background: rgba(124, 92, 255, 0.4);
   color: var(--bone);
 }
 
@@ -115,14 +116,14 @@ body::before {
 
 .panel {
   position: relative;
-  background-color: rgba(22, 17, 12, 0.82);
+  background-color: rgba(16, 16, 18, 0.85);
   border: 1px solid var(--dusk);
   border-radius: 2px;
   backdrop-filter: blur(6px);
 }
 
 .panel::before {
-  /* top inner highlight - instrument-panel sheen */
+  /* top inner highlight - subtle hairline of light */
   content: "";
   position: absolute;
   left: 0;
@@ -132,8 +133,8 @@ body::before {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(239, 227, 208, 0.12) 20%,
-    rgba(239, 227, 208, 0.12) 80%,
+    rgba(255, 255, 255, 0.10) 20%,
+    rgba(255, 255, 255, 0.10) 80%,
     transparent 100%
   );
 }
@@ -190,14 +191,18 @@ body::before {
   cursor: not-allowed;
 }
 
+/* Engage / primary action - rich dark brown so it reads as a deliberate
+   commit action against the cool violet accents elsewhere on the console. */
 .btn-primary {
-  background: var(--rust);
-  color: #031e1c;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.22) inset,
-    0 0 0 1px rgba(17, 191, 181, 0.45);
+  background: #3d2817;
+  color: #f5e9d6;
+  border-color: #5a3a22;
+  box-shadow: 0 1px 0 rgba(255, 230, 200, 0.10) inset,
+    0 0 0 1px rgba(90, 58, 34, 0.55);
 }
 .btn-primary:hover:not(:disabled) {
-  background: var(--ember);
+  background: #5a3a22;
+  color: #ffffff;
   transform: translateY(-1px);
 }
 
@@ -223,7 +228,7 @@ body::before {
 
 .input {
   width: 100%;
-  background: rgba(11, 8, 6, 0.6);
+  background: rgba(8, 8, 10, 0.7);
   border: 1px solid var(--dusk);
   border-radius: 1px;
   padding: 10px 12px;
@@ -235,7 +240,7 @@ body::before {
 .input:focus {
   outline: none;
   border-color: var(--rust);
-  background: rgba(35, 25, 18, 0.75);
+  background: rgba(20, 18, 28, 0.8);
 }
 
 /* Status pill - breathing glow when live. */
@@ -250,7 +255,7 @@ body::before {
   text-transform: uppercase;
   border-radius: 999px;
   border: 1px solid var(--dusk);
-  background: rgba(11, 8, 6, 0.6);
+  background: rgba(8, 8, 10, 0.7);
   color: var(--sand);
 }
 .status-dot {
@@ -264,7 +269,7 @@ body::before {
   animation: breathe 2.4s ease-in-out infinite;
 }
 .status-running {
-  border-color: rgba(17, 191, 181, 0.45);
+  border-color: rgba(124, 92, 255, 0.5);
   color: var(--bone);
 }
 .status-error .status-dot {
@@ -344,7 +349,7 @@ body::before {
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(239, 227, 208, 0.07) 50%,
+    rgba(255, 255, 255, 0.06) 50%,
     transparent 100%
   );
   pointer-events: none;
@@ -363,11 +368,11 @@ body::before {
 @keyframes breathe {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(17, 191, 181, 0.65);
+    box-shadow: 0 0 0 0 rgba(124, 92, 255, 0.65);
     opacity: 1;
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(17, 191, 181, 0);
+    box-shadow: 0 0 0 10px rgba(124, 92, 255, 0);
     opacity: 0.75;
   }
 }
@@ -406,10 +411,10 @@ body::before {
 }
 
 /* Brand mark - the Husky Robotics logo is black ink on a solid white PNG
-   ground (no alpha). On this dark console we tint toward the cyan accent. */
+   ground (no alpha). On this black console we invert it to white-on-black
+   and screen-blend to drop the surrounding ground. */
 .brand-mark {
-  filter: invert(1) sepia(0.45) saturate(1.8) hue-rotate(165deg) brightness(0.92)
-    contrast(1.05);
+  filter: invert(1) brightness(1.15) contrast(1.05);
   mix-blend-mode: screen;
 }
 

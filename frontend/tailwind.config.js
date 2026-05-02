@@ -9,23 +9,23 @@ export default {
         mono: ['"JetBrains Mono"', "ui-monospace", "monospace"],
       },
       colors: {
-        // Ground: Mars-surface tones.
-        umbra: "#0B0806",
-        soil: "#16110C",
-        rock: "#231912",
-        dusk: "#3A2A1B",
-        hair: "#54402C",
-        // Inked typography: bone-cream on umbra.
-        bone: "#EFE3D0",
-        sand: "#BEA888",
-        ash: "#6F5E4A",
-        // Primary accent: cyan blue (#11BFB5).
-        rust: "#11BFB5",
-        ember: "#47D4CB",
-        amber: "#6BC9C2",
-        sage: "#7FA05E",
-        blood: "#BE2F2B",
-        lake: "#3A5973",
+        // Ground: Husky Robotics pure-black surface tones.
+        umbra: "#000000",
+        soil: "#08080A",
+        rock: "#101012",
+        dusk: "#1F1F23",
+        hair: "#2A2A30",
+        // Inked typography: white on black, with zinc-grey midtones.
+        bone: "#FFFFFF",
+        sand: "#D4D4D8",
+        ash: "#8A8A92",
+        // Primary accent: violet (Husky Robotics brand purple).
+        rust: "#7C5CFF",
+        ember: "#9B85FF",
+        amber: "#B5A5FF",
+        sage: "#10B981",
+        blood: "#EF4444",
+        lake: "#52525B",
       },
       letterSpacing: {
         widest: "0.22em",
@@ -47,8 +47,8 @@ export default {
           "100%": { opacity: "1", transform: "translateX(0) scaleX(1)" },
         },
         breathe: {
-          "0%, 100%": { opacity: "1", boxShadow: "0 0 0 0 rgba(17,191,181,0.55)" },
-          "50%": { opacity: "0.7", boxShadow: "0 0 0 10px rgba(17,191,181,0)" },
+          "0%, 100%": { opacity: "1", boxShadow: "0 0 0 0 rgba(124,92,255,0.55)" },
+          "50%": { opacity: "0.7", boxShadow: "0 0 0 10px rgba(124,92,255,0)" },
         },
         scan: {
           "0%": { transform: "translateY(-100%)" },

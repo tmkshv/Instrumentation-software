@@ -55,52 +55,52 @@ export default function SpectrumChart({ spectrum }: Props) {
             margin={{ top: 8, right: 16, bottom: 12, left: 0 }}
           >
             <CartesianGrid
-              stroke="#3A2A1B"
+              stroke="#1F1F23"
               strokeDasharray="2 6"
               vertical={false}
             />
             <XAxis
               dataKey="wavelength"
-              stroke="#6F5E4A"
-              tick={{ fontFamily: "JetBrains Mono", fontSize: 10, fill: "#BEA888" }}
+              stroke="#8A8A92"
+              tick={{ fontFamily: "JetBrains Mono", fontSize: 10, fill: "#D4D4D8" }}
               tickFormatter={(v: number) => Math.round(v).toString()}
-              tickLine={{ stroke: "#54402C" }}
-              axisLine={{ stroke: "#3A2A1B" }}
+              tickLine={{ stroke: "#2A2A30" }}
+              axisLine={{ stroke: "#1F1F23" }}
               label={{
                 value: "WAVELENGTH / NM",
                 position: "insideBottom",
                 offset: -4,
-                fill: "#6F5E4A",
+                fill: "#8A8A92",
                 fontSize: 10,
                 fontFamily: "JetBrains Mono",
                 letterSpacing: "0.22em",
               }}
             />
             <YAxis
-              stroke="#6F5E4A"
-              tick={{ fontFamily: "JetBrains Mono", fontSize: 10, fill: "#BEA888" }}
+              stroke="#8A8A92"
+              tick={{ fontFamily: "JetBrains Mono", fontSize: 10, fill: "#D4D4D8" }}
               tickFormatter={(v: number) => v.toFixed(0)}
-              tickLine={{ stroke: "#54402C" }}
-              axisLine={{ stroke: "#3A2A1B" }}
+              tickLine={{ stroke: "#2A2A30" }}
+              axisLine={{ stroke: "#1F1F23" }}
               width={56}
             />
             <Tooltip
               contentStyle={{
-                background: "#0B0806",
-                border: "1px solid #54402C",
+                background: "#000000",
+                border: "1px solid #2A2A30",
                 borderRadius: 1,
                 fontFamily: "JetBrains Mono",
                 fontSize: 11,
               }}
-              itemStyle={{ color: "#EFE3D0" }}
-              labelStyle={{ color: "#BEA888" }}
+              itemStyle={{ color: "#FFFFFF" }}
+              labelStyle={{ color: "#D4D4D8" }}
               labelFormatter={(v: number) => `${v.toFixed(1)} nm`}
               formatter={(v: number) => v.toFixed(1)}
             />
             <Line
               type="monotone"
               dataKey="intensity"
-              stroke="#11BFB5"
+              stroke="#7C5CFF"
               dot={false}
               strokeWidth={1.75}
               isAnimationActive={false}
@@ -111,8 +111,8 @@ export default function SpectrumChart({ spectrum }: Props) {
                 x={wl}
                 y={spectrum.peak_intensities[i]}
                 r={3.5}
-                fill="#EFE3D0"
-                stroke="#11BFB5"
+                fill="#FFFFFF"
+                stroke="#7C5CFF"
                 strokeWidth={1.5}
               />
             ))}
