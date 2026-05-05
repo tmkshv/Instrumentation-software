@@ -59,10 +59,19 @@ export const api = {
  * the operator runs over a closed network and the token check is permissive
  * for camera URLs. If you need auth on streams, add a query-param scheme.
  */
+function cameraTokenQuery(): string {
+  const t = getToken();
+  return t ? `token=${encodeURIComponent(t)}` : "";
+}
+
 export function streamUrl(camId: string): string {
-  return `/api/cameras/${encodeURIComponent(camId)}/stream`;
+  const q = cameraTokenQuery();
+  return `/api/cameras/${encodeURIComponent(camId)}/stream${q ? `?${q}` : ""}`;
 }
 
 export function snapshotUrl(camId: string): string {
-  return `/api/cameras/${encodeURIComponent(camId)}/snapshot?ts=${Date.now()}`;
+  const params = new URLSearchParams({ ts: String(Date.now()) });
+  const t = getToken();
+  if (t) params.set("token", t);
+  return `/api/cameras/${encodeURIComponent(camId)}/snapshot?${params}`;
 }

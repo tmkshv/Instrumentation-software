@@ -5,9 +5,13 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import Response, StreamingResponse
 
-from ..auth import require_token
+from ..auth import require_token_for_cameras
 
-router = APIRouter(prefix="/api/cameras", tags=["cameras"], dependencies=[Depends(require_token)])
+router = APIRouter(
+    prefix="/api/cameras",
+    tags=["cameras"],
+    dependencies=[Depends(require_token_for_cameras)],
+)
 
 
 @router.get("")
@@ -34,7 +38,5 @@ async def stream(cam_id: str, request: Request):
     if cam is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="unknown camera")
     settings = request.app.state.settings
-    return StreamingResponse(
-        cam.stream(fps=settings.camera_fps, quality=settings.camera_jpeg_quality),
-        media_type="multipart/x-mixed-replace; boundary=frame",
-    )
+    media_type, body = cam.mjpeg_stream(settings.camera_fps, settings.camera_jpeg_quality)
+    return StreamingResponse(body, media_type=media_type)

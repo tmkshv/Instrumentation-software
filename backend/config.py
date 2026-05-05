@@ -8,13 +8,22 @@ environment file overrides these to point at real devices.
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Repo root (parent of ``backend/``) so ``camera.env`` loads even if cwd is elsewhere.
+_ROOT = Path(__file__).resolve().parent.parent
+_ENV_FILES = tuple(str(_ROOT / name) for name in (".env", "camera.env"))
+
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="HUSKY_", env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_prefix="HUSKY_",
+        env_file=_ENV_FILES,
+        extra="ignore",
+    )
 
     # Single shared bearer token. Empty string disables auth (dev only).
     token: str = ""

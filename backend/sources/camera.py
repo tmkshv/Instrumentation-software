@@ -1,25 +1,22 @@
 """Camera abstraction for microscope and overview feeds.
 
-Each `Camera` owns one OpenCV `VideoCapture` and serves frames as JPEGs.
-`CameraManager` builds them from the env-configured spec list, so adding
-or swapping cameras is a config change, not a code change. If a camera
-device is missing (or OpenCV isn't built with the right backend), the
-camera reports `available=False` and the stream returns a placeholder
-frame so the UI tile gracefully degrades.
+Local devices use OpenCV ``VideoCapture``. HTTP(S) MJPEG URLs use a
+passthrough path (OpenCV often fails on ``?action=stream`` URLs).
 """
 
 from __future__ import annotations
 
 import threading
 import time
+import urllib.request
 from dataclasses import dataclass
-from typing import Dict, Iterable, Iterator, List, Optional
+from typing import Dict, Iterable, Iterator, List, Optional, Union
 
 import numpy as np
 
 try:
     import cv2  # type: ignore
-except Exception:  # pragma: no cover - cv2 is in requirements but be defensive
+except Exception:  # pragma: no cover
     cv2 = None  # type: ignore
 
 
@@ -44,8 +41,19 @@ class Camera:
         if cv2 is None:
             return
         try:
-            target: object = int(self.device) if self.device.isdigit() else self.device
-            cap = cv2.VideoCapture(target)
+            device = self.device
+            if device.isdigit():
+                cap = cv2.VideoCapture(int(device))
+            elif device.startswith(("http://", "https://")):
+                cap = None
+                if hasattr(cv2, "CAP_FFMPEG"):
+                    cap = cv2.VideoCapture(device, cv2.CAP_FFMPEG)
+                if cap is None or not cap.isOpened():
+                    if cap is not None:
+                        cap.release()
+                    cap = cv2.VideoCapture(device)
+            else:
+                cap = cv2.VideoCapture(device)
             if cap.isOpened():
                 self._cap = cap
             else:
@@ -90,6 +98,9 @@ class Camera:
                 )
             time.sleep(period)
 
+    def mjpeg_stream(self, fps: int, quality: int) -> tuple[str, Iterator[bytes]]:
+        return ("multipart/x-mixed-replace; boundary=frame", self.stream(fps, quality))
+
     def release(self) -> None:
         with self._lock:
             if self._cap is not None:
@@ -101,7 +112,6 @@ class Camera:
 
 
 def _placeholder_frame(label: str) -> np.ndarray:
-    """Dark frame with a 'no signal' label; used when a camera is missing."""
     h, w = 360, 640
     img = np.zeros((h, w, 3), dtype=np.uint8)
     img[:] = (24, 24, 32)
@@ -114,21 +124,146 @@ def _placeholder_frame(label: str) -> np.ndarray:
     return img
 
 
+def _encode_placeholder_jpeg(label: str, quality: int) -> bytes:
+    frame = _placeholder_frame(label)
+    if cv2 is None:
+        return b""
+    ok, buf = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), quality])
+    return buf.tobytes() if ok else b""
+
+
+def _http_user_agent() -> str:
+    return "Mozilla/5.0 (compatible; HuskyScience/1.0)"
+
+
+def _extract_first_jpeg_from_url(url: str, max_bytes: int = 2_000_000) -> bytes:
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": _http_user_agent()})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            buf = b""
+            while len(buf) < max_bytes:
+                chunk = resp.read(8192)
+                if not chunk:
+                    break
+                buf += chunk
+                start = buf.find(b"\xff\xd8")
+                if start == -1:
+                    continue
+                end = buf.find(b"\xff\xd9", start + 2)
+                if end != -1:
+                    return buf[start : end + 1]
+    except Exception:
+        pass
+    return b""
+
+
+class HttpMjpegCamera:
+    def __init__(self, cam_id: str, label: str, url: str) -> None:
+        self.id = cam_id
+        self.label = label
+        self.device = url
+        self._available = self._probe()
+
+    def _probe(self) -> bool:
+        try:
+            req = urllib.request.Request(self.device, headers={"User-Agent": _http_user_agent()})
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                chunk = resp.read(2048)
+                return len(chunk) > 0
+        except Exception:
+            return False
+
+    @property
+    def available(self) -> bool:
+        return self._available
+
+    def info(self) -> CameraInfo:
+        return CameraInfo(id=self.id, label=self.label, device=self.device, available=self.available)
+
+    def _snapshot_substitute_url(self) -> Optional[str]:
+        if "action=stream" in self.device:
+            return self.device.replace("action=stream", "action=snapshot", 1)
+        return None
+
+    def read_jpeg(self, quality: int = 70) -> bytes:
+        snap = self._snapshot_substitute_url()
+        if snap:
+            try:
+                req = urllib.request.Request(snap, headers={"User-Agent": _http_user_agent()})
+                with urllib.request.urlopen(req, timeout=8) as resp:
+                    data = resp.read()
+                    if data.startswith(b"\xff\xd8"):
+                        return data
+            except Exception:
+                pass
+        jpeg = _extract_first_jpeg_from_url(self.device)
+        if jpeg:
+            return jpeg
+        return _encode_placeholder_jpeg(self.label, quality)
+
+    def mjpeg_stream(self, fps: int, quality: int) -> tuple[str, Iterator[bytes]]:
+        del fps, quality
+
+        req = urllib.request.Request(self.device, headers={"User-Agent": _http_user_agent()})
+        resp = urllib.request.urlopen(req, timeout=None)
+        content_type = resp.headers.get("Content-Type", "multipart/x-mixed-replace; boundary=frame")
+
+        def gen() -> Iterator[bytes]:
+            try:
+                while True:
+                    chunk = resp.read(65536)
+                    if not chunk:
+                        break
+                    yield chunk
+            finally:
+                resp.close()
+
+        return content_type, gen()
+
+    def release(self) -> None:
+        pass
+
+
+def _parse_camera_spec(raw: str, index: int) -> tuple[str, str]:
+    s = raw.strip()
+    if not s:
+        raise ValueError("empty camera spec")
+
+    positions = [s.find(m) for m in ("https://", "http://")]
+    positions = [p for p in positions if p != -1]
+    url_start = min(positions) if positions else -1
+
+    if url_start != -1:
+        if url_start > 0 and s[url_start - 1] == ":":
+            label = s[: url_start - 1].strip() or f"cam{index}"
+            device = s[url_start:].strip()
+        else:
+            label = f"cam{index}"
+            device = s.strip() if url_start == 0 else s[url_start:].strip()
+        return label, device
+
+    if ":" in s:
+        label, device = s.split(":", 1)
+    else:
+        label, device = f"cam{index}", s
+    return label.strip() or f"cam{index}", device.strip()
+
+
 class CameraManager:
     def __init__(self, specs: Iterable[str]) -> None:
-        self._cameras: Dict[str, Camera] = {}
+        self._cameras: Dict[str, Union[Camera, HttpMjpegCamera]] = {}
         for i, raw in enumerate(specs):
-            if ":" in raw:
-                label, device = raw.split(":", 1)
+            label, device = _parse_camera_spec(raw, i)
+            cam_id = label.lower().replace(" ", "_") or f"cam{i}"
+            if device.startswith(("http://", "https://")):
+                self._cameras[cam_id] = HttpMjpegCamera(cam_id, label or cam_id, device)
             else:
-                label, device = f"cam{i}", raw
-            cam_id = label.strip().lower().replace(" ", "_") or f"cam{i}"
-            self._cameras[cam_id] = Camera(cam_id, label.strip() or cam_id, device.strip())
+                self._cameras[cam_id] = Camera(cam_id, label or cam_id, device)
 
     def list(self) -> List[CameraInfo]:
         return [c.info() for c in self._cameras.values()]
 
-    def get(self, cam_id: str) -> Optional[Camera]:
+    def get(self, cam_id: str) -> Optional[Union[Camera, HttpMjpegCamera]]:
         return self._cameras.get(cam_id)
 
     def release_all(self) -> None:
