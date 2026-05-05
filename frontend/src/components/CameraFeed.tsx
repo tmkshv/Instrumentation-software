@@ -14,7 +14,7 @@ export default function CameraFeed({ camera, index }: Props) {
   const optical = String(index + 1).padStart(2, "0");
 
   return (
-    <div className="panel p-3">
+    <div className="panel p-4">
       {/* Upper rail */}
       <div className="flex items-center justify-between pb-2">
         <div className="flex items-baseline gap-3">
@@ -32,7 +32,7 @@ export default function CameraFeed({ camera, index }: Props) {
         </span>
       </div>
 
-      <div className="reticle-shell relative aspect-video bg-black overflow-hidden">
+      <div className="reticle-shell relative w-full min-h-[220px] h-[min(62vh,820px)] max-h-[85vh] bg-black overflow-hidden rounded-sm">
         <img
           key={url}
           src={url}

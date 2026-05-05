@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import CameraFeed from "../components/CameraFeed";
+import FovScreenshotPanel from "../components/FovScreenshotPanel";
 import ChemPanel from "../components/ChemPanel";
 import ConfidenceBadge from "../components/ConfidenceBadge";
 import ControlBar, { ControlAction } from "../components/ControlBar";
@@ -121,18 +122,25 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Camera bank */}
+      {/* Camera bank + screenshot rail */}
       <div style={{ ["--i" as string]: 2 }}>
-        <SectionHeader eyebrow="Optical / Live" title="Field of View" />
-        {cameras.cameras.length === 0 ? (
-          <EmptyCameras />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            {cameras.cameras.map((c, i) => (
-              <CameraFeed key={c.id} camera={c} index={i} />
-            ))}
+        <div className="flex flex-col lg:flex-row gap-6 lg:items-start">
+          <div className="min-w-0 w-full lg:grow-[2] lg:basis-0">
+            <SectionHeader eyebrow="Optical / Live" title="Field of View" />
+            {cameras.cameras.length === 0 ? (
+              <EmptyCameras />
+            ) : (
+              <div className="grid grid-cols-1 gap-6">
+                {cameras.cameras.map((c, i) => (
+                  <CameraFeed key={c.id} camera={c} index={i} />
+                ))}
+              </div>
+            )}
           </div>
-        )}
+          <aside className="w-full lg:grow lg:basis-0 lg:max-w-[min(280px,32vw)] shrink-0 lg:sticky lg:top-4 self-stretch">
+            <FovScreenshotPanel cameras={cameras.cameras} />
+          </aside>
+        </div>
       </div>
 
       {/* Chem strip */}

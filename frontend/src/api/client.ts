@@ -75,3 +75,22 @@ export function snapshotUrl(camId: string): string {
   if (t) params.set("token", t);
   return `/api/cameras/${encodeURIComponent(camId)}/snapshot?${params}`;
 }
+
+/** Single JPEG frame from the camera snapshot endpoint (for save / preview). */
+export async function fetchCameraSnapshot(camId: string): Promise<Blob> {
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(snapshotUrl(camId), { headers });
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const data = await res.json();
+      detail = (data as { detail?: string }).detail ?? detail;
+    } catch {
+      /* not json */
+    }
+    throw new ApiError(res.status, detail);
+  }
+  return res.blob();
+}
