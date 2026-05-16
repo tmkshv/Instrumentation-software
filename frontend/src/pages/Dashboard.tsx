@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import CameraFeed from "../components/CameraFeed";
+import CameraSelector from "../components/CameraSelector";
 import FovScreenshotPanel from "../components/FovScreenshotPanel";
 import ChemPanel from "../components/ChemPanel";
 import ConfidenceBadge from "../components/ConfidenceBadge";
@@ -126,7 +127,10 @@ export default function Dashboard() {
       <div style={{ ["--i" as string]: 2 }}>
         <div className="flex flex-col lg:flex-row gap-6 lg:items-start">
           <div className="min-w-0 w-full lg:grow-[2] lg:basis-0">
-            <SectionHeader eyebrow="Optical / Live" title="Field of View" />
+            <div className="flex items-end justify-between mb-3 gap-4 flex-wrap">
+              <SectionHeader eyebrow="Optical / Live" title="Field of View" noMargin />
+              <CameraSelector />
+            </div>
             {cameras.cameras.length === 0 ? (
               <EmptyCameras />
             ) : (
@@ -151,9 +155,17 @@ export default function Dashboard() {
   );
 }
 
-function SectionHeader({ eyebrow, title }: { eyebrow: string; title: string }) {
+function SectionHeader({
+  eyebrow,
+  title,
+  noMargin,
+}: {
+  eyebrow: string;
+  title: string;
+  noMargin?: boolean;
+}) {
   return (
-    <div className="mb-3">
+    <div className={noMargin ? undefined : "mb-3"}>
       <div className="eyebrow">{eyebrow}</div>
       <h2 className="display text-bone text-2xl mt-1">{title}</h2>
     </div>

@@ -54,6 +54,15 @@ class Settings(BaseSettings):
     # Where the built React app lives. Served at "/".
     frontend_dist: str = "frontend/dist"
 
+    # URL of the robot-side camera switching service (camera_service.py).
+    # Example: "http://100.80.12.52:9000"
+    # Leave empty to disable camera switching.
+    cam_svc_url: str = ""
+
+    # Shared token sent as X-Camera-Token header to the camera service.
+    # Must match CAMERA_SVC_TOKEN on the rover.  Leave empty to disable.
+    cam_svc_token: str = ""
+
     @property
     def camera_specs(self) -> List[str]:
         return [s.strip() for s in self.cameras.split(",") if s.strip()]

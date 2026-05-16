@@ -5,6 +5,7 @@ The frontend's ControlBar talks to this router.
 
 from __future__ import annotations
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from ..auth import require_token
@@ -25,12 +26,33 @@ async def get_status(request: Request):
     return _state(request).snapshot()
 
 
+async def _activate_default_camera(request: Request) -> None:
+    """Fire-and-forget: ask the rover camera service to start the FOV camera.
+
+    Failures are logged but do not block the science session from starting —
+    the operator can switch cameras manually from the UI.
+    """
+    settings = request.app.state.settings
+    base = settings.cam_svc_url.rstrip("/")
+    if not base:
+        return
+    headers = {}
+    if settings.cam_svc_token:
+        headers["X-Camera-Token"] = settings.cam_svc_token
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            await client.post(f"{base}/camera/video2/activate", headers=headers)
+    except Exception:
+        pass  # camera switching is best-effort; science session still starts
+
+
 @router.post("/start")
 async def start(request: Request):
     try:
         session_id = _runner(request).start()
     except Exception as exc:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
+    await _activate_default_camera(request)
     return {"ok": True, "session_id": session_id}
 
 
