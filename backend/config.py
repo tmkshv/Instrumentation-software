@@ -63,6 +63,20 @@ class Settings(BaseSettings):
     # Must match CAMERA_SVC_TOKEN on the rover.  Leave empty to disable.
     cam_svc_token: str = ""
 
+    # Spectrometer source.
+    #   "mock"  – uses test_spectrum.npy (default, works without hardware)
+    #   "csv"   – reads color-band CSV from the Pi (production)
+    spectrometer_source: str = "mock"
+
+    # Path to the color spectrometer CSV on the Pi.
+    # Columns: Red,Orange,Yellow,Green,Cyan,Blue
+    color_csv_path: str = "/home/robot/HR-pi/output_data/peaks_colors.csv"
+
+    # Path to the organic percentage CSV on the Pi.
+    # Must contain a column named "organic_pct" or "organic_percent".
+    # Leave empty to disable organic_pct reading.
+    organic_pct_csv_path: str = ""
+
     @property
     def camera_specs(self) -> List[str]:
         return [s.strip() for s in self.cameras.split(",") if s.strip()]

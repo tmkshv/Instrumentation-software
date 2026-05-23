@@ -26,9 +26,18 @@ from .config import get_settings
 from .routers import actions, calibration, cameras, chem, control, sessions, spectrum
 from .sources.camera import CameraManager
 from .sources.chem import build_chem_source
-from .sources.spectrometer import SpectrometerService
+from .sources.spectrometer import CsvColorSpectrometer, SpectrometerService
 from .state import get_state
 from .workers.sample_runner import SampleRunner
+
+
+def _build_spectrometer(settings):
+    if settings.spectrometer_source == "csv":
+        return CsvColorSpectrometer(
+            color_csv=settings.color_csv_path,
+            organic_pct_csv=settings.organic_pct_csv_path,
+        )
+    return SpectrometerService()
 
 
 @asynccontextmanager
@@ -36,7 +45,7 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
     state = get_state()
 
-    spectrometer = SpectrometerService()
+    spectrometer = _build_spectrometer(settings)
     spectrometer.set_calibration([(p.pixel, p.wavelength_nm) for p in state.calibration])
 
     chem_source = build_chem_source(settings.chem_source)

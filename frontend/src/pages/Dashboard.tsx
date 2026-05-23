@@ -17,6 +17,7 @@ interface Envelope<T> {
 
 export default function Dashboard() {
   const [statusBump, setStatusBump] = useState(0);
+  const [spectrumBump, setSpectrumBump] = useState(0);
 
   const cameras =
     usePolling(() => api.get<{ cameras: CameraInfo[] }>("/api/cameras"), 10_000) ?? {
@@ -32,15 +33,23 @@ export default function Dashboard() {
   const spectrumEnv = usePolling<Envelope<SpectrumPayload>>(
     () => api.get<Envelope<SpectrumPayload>>("/api/spectrum/latest"),
     1_000,
+    [spectrumBump],
   );
   const spectrum = spectrumEnv?.data ?? null;
+
+  const handleControlChanged = () => {
+    setStatusBump((n) => n + 1);
+    // Force immediate spectrum + organic_pct refresh after engage or sample.
+    setTimeout(() => setSpectrumBump((n) => n + 1), 300);
+    setTimeout(() => setSpectrumBump((n) => n + 1), 1500);
+  };
 
   return (
     <div className="stagger flex flex-col gap-5" style={{ ["--stagger" as string]: "70ms" }}>
       <div style={{ ["--i" as string]: 0 }}>
         <ControlBar
           status={status}
-          onChanged={() => setStatusBump((n) => n + 1)}
+          onChanged={handleControlChanged}
         />
       </div>
 
