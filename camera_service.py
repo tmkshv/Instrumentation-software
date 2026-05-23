@@ -37,14 +37,14 @@ _TOKEN = os.environ.get("CAMERA_SVC_TOKEN", "")
 # Edit these to match the exact mjpg_streamer commands used on the rover.
 # Key = camera_id that the website sends, value = full argv list for Popen.
 CAMERAS: dict[str, list[str]] = {
+    "video0": [
+        "mjpg_streamer",
+        "-i", "input_uvc.so -d /dev/video0 -r 1280x720 -f 15",
+        "-o", f"output_http.so -p {STREAM_PORT} -w /usr/local/www",
+    ],
     "video2": [
         "mjpg_streamer",
         "-i", "input_uvc.so -d /dev/video2 -r 1280x720 -f 15",
-        "-o", f"output_http.so -p {STREAM_PORT} -w /usr/local/www",
-    ],
-    "video3": [
-        "mjpg_streamer",
-        "-i", "input_uvc.so -d /dev/video3 -r 1280x720 -f 15",
         "-o", f"output_http.so -p {STREAM_PORT} -w /usr/local/www",
     ],
 }

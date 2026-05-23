@@ -15,8 +15,8 @@ interface SwitcherStatus {
 }
 
 const CAMERA_OPTIONS = [
+  { id: "video0", label: "Video 0" },
   { id: "video2", label: "Video 2" },
-  { id: "video3", label: "Video 3" },
 ] as const;
 
 export default function CameraSelector() {

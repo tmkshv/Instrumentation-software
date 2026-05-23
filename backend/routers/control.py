@@ -41,7 +41,7 @@ async def _activate_default_camera(request: Request) -> None:
         headers["X-Camera-Token"] = settings.cam_svc_token
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
-            await client.post(f"{base}/camera/video2/activate", headers=headers)
+            await client.post(f"{base}/camera/video0/activate", headers=headers)
     except Exception:
         pass  # camera switching is best-effort; science session still starts
 
