@@ -43,6 +43,12 @@ ACTIONS: Dict[str, dict] = {
         "command": ["/home/robot/HR-pi/C_Code/SystemsTesting/Automation/dirtSample"],
         "timeout": 240,
     },
+    "mixing_chamber": {
+        "label": "Mixing Chamber",
+        "description": "Run the mixing chamber automation sequence.",
+        "command": ["/home/robot/HR-pi/C_Code/SystemsTesting/Automation/mixingChamberAutomation"],
+        "timeout": 180,
+    },
 }
 
 # ── In-memory state ───────────────────────────────────────────────────────────
