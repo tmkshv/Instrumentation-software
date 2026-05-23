@@ -47,6 +47,11 @@ CAMERAS: dict[str, list[str]] = {
         "-i", "input_uvc.so -d /dev/video2 -r 1280x720 -f 15",
         "-o", f"output_http.so -p {STREAM_PORT} -w /usr/local/www",
     ],
+    "video4": [
+        "mjpg_streamer",
+        "-i", "input_uvc.so -d /dev/video4 -r 1280x720 -f 15",
+        "-o", f"output_http.so -p {STREAM_PORT} -w /usr/local/www",
+    ],
 }
 
 # ── Internal state ─────────────────────────────────────────────────────────────
