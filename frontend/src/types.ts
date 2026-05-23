@@ -58,6 +58,20 @@ export interface SessionSummary {
   measurement_count: number;
 }
 
+export interface RobotAction {
+  id: string;
+  label: string;
+  description: string;
+  running: boolean;
+  started_at: number | null;
+  finished_at: number | null;
+  elapsed_s: number | null;
+  exit_code: number | null;
+  stdout: string;
+  stderr: string;
+  error: string | null;
+}
+
 export interface SessionDetail {
   session_id: string;
   start_time: string;

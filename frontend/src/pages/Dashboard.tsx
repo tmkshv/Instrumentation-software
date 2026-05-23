@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api } from "../api/client";
+import ActionPanel from "../components/ActionPanel";
 import CameraFeed from "../components/CameraFeed";
 import CameraSelector from "../components/CameraSelector";
 import FovScreenshotPanel from "../components/FovScreenshotPanel";
@@ -43,6 +44,10 @@ export default function Dashboard() {
         />
       </div>
 
+      <div style={{ ["--i" as string]: 1 }}>
+        <ActionPanel />
+      </div>
+
       {/* Hero: surface biosignals + spectrum in an asymmetric 5+7 column grid */}
       <div
         className="grid grid-cols-1 lg:grid-cols-12 gap-5"
@@ -57,7 +62,7 @@ export default function Dashboard() {
       </div>
 
       {/* Camera bank + screenshot rail */}
-      <div style={{ ["--i" as string]: 2 }}>
+      <div style={{ ["--i" as string]: 3 }}>
         <div className="flex flex-col lg:flex-row gap-6 lg:items-start">
           <div className="min-w-0 w-full lg:grow-[2] lg:basis-0">
             <div className="flex items-end justify-between mb-3 gap-4 flex-wrap">

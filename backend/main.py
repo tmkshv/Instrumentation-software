@@ -23,7 +23,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .config import get_settings
-from .routers import calibration, cameras, chem, control, sessions, spectrum
+from .routers import actions, calibration, cameras, chem, control, sessions, spectrum
 from .sources.camera import CameraManager
 from .sources.chem import build_chem_source
 from .sources.spectrometer import SpectrometerService
@@ -77,6 +77,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    app.include_router(actions.router)
     app.include_router(control.router)
     app.include_router(spectrum.router)
     app.include_router(chem.router)
