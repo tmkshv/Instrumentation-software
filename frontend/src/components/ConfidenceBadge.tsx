@@ -5,8 +5,9 @@ interface Props {
 }
 
 export default function ConfidenceBadge({ bio }: Props) {
-  const detected = bio?.organics ?? false;
   const pct = bio?.organic_pct ?? null;
+  // Organics are detected when the color-test percentage is 50 % or above.
+  const detected = pct !== null ? pct >= 50 : (bio?.organics ?? false);
 
   return (
     <section className="panel p-6 md:p-8 h-full flex flex-col overflow-hidden relative">

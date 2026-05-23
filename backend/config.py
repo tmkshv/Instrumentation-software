@@ -77,6 +77,10 @@ class Settings(BaseSettings):
     # Leave empty to disable organic_pct reading.
     organic_pct_csv_path: str = ""
 
+    # If set, /api/spectrum/latest proxies this URL instead of reading local state.
+    # Example: "http://100.80.12.52:9001/spectrum"
+    spectrum_api_url: str = ""
+
     @property
     def camera_specs(self) -> List[str]:
         return [s.strip() for s in self.cameras.split(",") if s.strip()]

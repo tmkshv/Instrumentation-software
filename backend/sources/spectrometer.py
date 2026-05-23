@@ -256,13 +256,18 @@ def _detect_biosignatures(peak_wavelengths: Any) -> Dict[str, Any]:
     }
 
 
+ORGANIC_DETECTED_THRESHOLD = 50.0  # % — at or above this value organics are detected
+
+
 def _detect_biosignatures_csv(
     has_organics: bool,
     organic_pct: Optional[float],
 ) -> Dict[str, Any]:
     """Biosignature result for CSV color spectrometer."""
-    if organic_pct is not None and organic_pct > 0:
+    if organic_pct is not None and organic_pct >= ORGANIC_DETECTED_THRESHOLD:
         has_organics = True
+    elif organic_pct is not None:
+        has_organics = False
 
     if has_organics:
         confidence, interpretation = "low", "Organic signal detected"
