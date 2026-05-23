@@ -19,6 +19,8 @@ export interface Biosignatures {
   chlorophyll: boolean;
   carotenoids: boolean;
   organics: boolean;
+  /** Percentage of organic matter from the color test (0–100). Null until measured. */
+  organic_pct: number | null;
   confidence: "none" | "low" | "medium" | "high";
   interpretation: string;
 }

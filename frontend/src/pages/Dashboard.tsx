@@ -1,19 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { api } from "../api/client";
 import CameraFeed from "../components/CameraFeed";
 import CameraSelector from "../components/CameraSelector";
 import FovScreenshotPanel from "../components/FovScreenshotPanel";
-import ChemPanel from "../components/ChemPanel";
 import ConfidenceBadge from "../components/ConfidenceBadge";
-import ControlBar, { ControlAction } from "../components/ControlBar";
+import ControlBar from "../components/ControlBar";
 import SpectrumChart from "../components/SpectrumChart";
 import { usePolling } from "../hooks/usePolling";
-import {
-  CameraInfo,
-  ChemReading,
-  SpectrumPayload,
-  SystemStatus,
-} from "../types";
+import { CameraInfo, SpectrumPayload, SystemStatus } from "../types";
 
 interface Envelope<T> {
   status: "ok" | "no_data";
@@ -22,9 +16,6 @@ interface Envelope<T> {
 
 export default function Dashboard() {
   const [statusBump, setStatusBump] = useState(0);
-  const [controlAction, setControlAction] = useState<ControlAction | null>(null);
-  const [chemLatestEnv, setChemLatestEnv] = useState<Envelope<ChemReading> | null>(null);
-  const [chemHistory, setChemHistory] = useState<ChemReading[]>([]);
 
   const cameras =
     usePolling(() => api.get<{ cameras: CameraInfo[] }>("/api/cameras"), 10_000) ?? {
@@ -43,70 +34,12 @@ export default function Dashboard() {
   );
   const spectrum = spectrumEnv?.data ?? null;
 
-  const isRunning = status?.status === "running";
-
-  useEffect(() => {
-    if (!isRunning) return;
-    let cancelled = false;
-    const tick = async () => {
-      try {
-        const latestRes = await api.get<Envelope<ChemReading>>("/api/chem/latest");
-        const histRes = await api.get<{ status: string; data: ChemReading[] }>(
-          "/api/chem/history?minutes=5",
-        );
-        if (cancelled) return;
-        setChemLatestEnv(latestRes);
-        setChemHistory(histRes?.data ?? []);
-      } catch {
-        /* keep last values */
-      }
-    };
-    tick();
-    const id = window.setInterval(tick, 1_000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(id);
-    };
-  }, [isRunning]);
-
-  useEffect(() => {
-    if (!controlAction) return;
-    if (controlAction !== "sample") {
-      setControlAction(null);
-      return;
-    }
-    if (status?.status === "running") {
-      setControlAction(null);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      try {
-        const latestRes = await api.get<Envelope<ChemReading>>("/api/chem/latest");
-        const reading = latestRes?.data ?? null;
-        if (cancelled) return;
-        setChemLatestEnv(latestRes);
-        setChemHistory(reading ? [reading] : []);
-      } catch {
-        /* keep */
-      } finally {
-        if (!cancelled) setControlAction(null);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [controlAction, status?.status]);
-
   return (
     <div className="stagger flex flex-col gap-5" style={{ ["--stagger" as string]: "70ms" }}>
       <div style={{ ["--i" as string]: 0 }}>
         <ControlBar
           status={status}
-          onChanged={(action) => {
-            setStatusBump((n) => n + 1);
-            setControlAction(action);
-          }}
+          onChanged={() => setStatusBump((n) => n + 1)}
         />
       </div>
 
@@ -147,10 +80,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Chem strip */}
-      <div style={{ ["--i" as string]: 3 }}>
-        <ChemPanel latest={chemLatestEnv?.data ?? null} history={chemHistory} />
-      </div>
     </div>
   );
 }

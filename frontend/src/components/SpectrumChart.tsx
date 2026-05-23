@@ -30,13 +30,13 @@ export default function SpectrumChart({ spectrum }: Props) {
     <section className="panel p-5 md:p-6 flex flex-col gap-4 h-full min-h-[360px]">
       <header className="flex items-start justify-between gap-6">
         <div>
-          <div className="eyebrow">SPEC/ 400-700 NM</div>
+          <div className="eyebrow">SPEC / 6-CHANNEL VISIBLE</div>
           <h2 className="display text-bone text-3xl md:text-4xl mt-2">
-            Reflectance Signature
+            Spectrometer Test
           </h2>
           <p className="mono text-[11px] tracking-wider text-ash mt-1">
             {spectrum
-              ? `Sample ${spectrum.sample_id} - ${peakCount} peaks detected`
+              ? `Sample ${spectrum.sample_id} — ${spectrum.wavelengths.length} channels`
               : "Awaiting first acquisition"}
           </p>
         </div>
@@ -101,8 +101,9 @@ export default function SpectrumChart({ spectrum }: Props) {
               type="monotone"
               dataKey="intensity"
               stroke="#7C5CFF"
-              dot={false}
-              strokeWidth={1.75}
+              dot={{ r: 4, fill: "#7C5CFF", stroke: "#FFFFFF", strokeWidth: 1.5 }}
+              activeDot={{ r: 6, fill: "#FFFFFF", stroke: "#7C5CFF", strokeWidth: 2 }}
+              strokeWidth={2}
               isAnimationActive={false}
             />
             {spectrum?.peak_wavelengths.map((wl, i) => (

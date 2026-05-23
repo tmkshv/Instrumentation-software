@@ -162,16 +162,19 @@ class HttpMjpegCamera:
         self.id = cam_id
         self.label = label
         self.device = url
-        self._available = self._probe()
+        self._available = False
+        # Probe in a background thread so a robot being offline never blocks startup.
+        t = threading.Thread(target=self._probe_async, daemon=True)
+        t.start()
 
-    def _probe(self) -> bool:
+    def _probe_async(self) -> None:
         try:
             req = urllib.request.Request(self.device, headers={"User-Agent": _http_user_agent()})
-            with urllib.request.urlopen(req, timeout=8) as resp:
+            with urllib.request.urlopen(req, timeout=3) as resp:
                 chunk = resp.read(2048)
-                return len(chunk) > 0
+                self._available = len(chunk) > 0
         except Exception:
-            return False
+            self._available = False
 
     @property
     def available(self) -> bool:
@@ -202,23 +205,49 @@ class HttpMjpegCamera:
         return _encode_placeholder_jpeg(self.label, quality)
 
     def mjpeg_stream(self, fps: int, quality: int) -> tuple[str, Iterator[bytes]]:
-        del fps, quality
+        del quality
+        content_type = "multipart/x-mixed-replace; boundary=frame"
 
-        req = urllib.request.Request(self.device, headers={"User-Agent": _http_user_agent()})
-        resp = urllib.request.urlopen(req, timeout=None)
-        content_type = resp.headers.get("Content-Type", "multipart/x-mixed-replace; boundary=frame")
+        # Try to connect to the robot stream with a short timeout so the
+        # browser does not hang indefinitely when the robot is offline.
+        try:
+            req = urllib.request.Request(self.device, headers={"User-Agent": _http_user_agent()})
+            resp = urllib.request.urlopen(req, timeout=4)
+            detected_ct = resp.headers.get("Content-Type", content_type)
 
-        def gen() -> Iterator[bytes]:
-            try:
+            def live_gen() -> Iterator[bytes]:
+                try:
+                    while True:
+                        chunk = resp.read(65536)
+                        if not chunk:
+                            break
+                        yield chunk
+                finally:
+                    resp.close()
+
+            return detected_ct, live_gen()
+
+        except Exception:
+            # Robot offline — stream placeholder "no signal" frames so the
+            # browser <img> gets a valid MJPEG response immediately.
+            period = 1.0 / max(fps, 1)
+
+            def placeholder_gen() -> Iterator[bytes]:
+                boundary = b"--frame"
                 while True:
-                    chunk = resp.read(65536)
-                    if not chunk:
-                        break
-                    yield chunk
-            finally:
-                resp.close()
+                    jpeg = _encode_placeholder_jpeg(self.label, 70)
+                    if jpeg:
+                        yield (
+                            boundary
+                            + b"\r\nContent-Type: image/jpeg\r\nContent-Length: "
+                            + str(len(jpeg)).encode()
+                            + b"\r\n\r\n"
+                            + jpeg
+                            + b"\r\n"
+                        )
+                    time.sleep(period)
 
-        return content_type, gen()
+            return content_type, placeholder_gen()
 
     def release(self) -> None:
         pass

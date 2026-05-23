@@ -4,46 +4,54 @@ interface Props {
   bio: Biosignatures | null;
 }
 
-const MARKERS: Array<{
-  key: keyof Omit<Biosignatures, "confidence" | "interpretation">;
-  label: string;
-  band: string;
-}> = [
-  { key: "chlorophyll", label: "Chlorophyll", band: "430 / 660 nm" },
-  { key: "carotenoids", label: "Carotenoids", band: "450-550 nm" },
-  { key: "organics", label: "Organics", band: "400-450 nm" },
-];
-
 export default function ConfidenceBadge({ bio }: Props) {
+  const detected = bio?.organics ?? false;
+  const pct = bio?.organic_pct ?? null;
+
   return (
     <section className="panel p-6 md:p-8 h-full flex flex-col overflow-hidden relative">
-      <div>
-        <h2 className="display text-bone text-lg md:text-xl tracking-tight">
-          Surface biosignals
-        </h2>
-        <div className="tick-rule mt-3 mb-4" />
-        <ul className="grid grid-cols-3 gap-4">
-          {MARKERS.map(({ key, label, band }) => {
-            const present = bio?.[key];
-            return (
-              <li key={key} className="flex flex-col gap-1">
-                <span
-                  className={`mono text-[10px] tracking-[0.25em] uppercase ${
-                    present ? "text-sage" : "text-ash"
-                  }`}
-                >
-                  {present ? "\u25cf PRESENT" : "\u25cb ABSENT"}
-                </span>
-                <span className="display text-bone text-lg leading-tight">
-                  {label}
-                </span>
-                <span className="mono text-[10px] tracking-wider text-ash">
-                  {band}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+      <div className="eyebrow">COLOR TEST / SOIL</div>
+      <h2 className="display text-bone text-lg md:text-xl tracking-tight mt-1">
+        Organic Analysis
+      </h2>
+      <div className="tick-rule mt-3 mb-5" />
+
+      {/* Percentage readout */}
+      <div className="flex items-end gap-3 mb-4">
+        <span
+          className={`display leading-none ${
+            pct === null
+              ? "text-ash text-5xl"
+              : detected
+              ? "text-sage text-6xl"
+              : "text-bone text-6xl"
+          }`}
+        >
+          {pct === null ? "---" : `${pct.toFixed(1)}`}
+        </span>
+        {pct !== null && (
+          <span className="mono text-[18px] tracking-wider text-ash mb-1">%</span>
+        )}
+      </div>
+
+      <div className="mono text-[10px] tracking-wider text-ash mb-5">
+        Organic matter — color test result
+      </div>
+
+      {/* Detection status */}
+      <div className="flex flex-col gap-1">
+        <span
+          className={`mono text-[10px] tracking-[0.25em] uppercase ${
+            detected ? "text-sage" : "text-ash"
+          }`}
+        >
+          {detected ? "\u25cf ORGANICS DETECTED" : "\u25cb NOT DETECTED"}
+        </span>
+        {bio?.interpretation && (
+          <span className="mono text-[10px] tracking-wider text-sand mt-1">
+            {bio.interpretation}
+          </span>
+        )}
       </div>
     </section>
   );
